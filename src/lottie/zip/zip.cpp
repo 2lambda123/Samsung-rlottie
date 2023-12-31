@@ -13,20 +13,20 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(_MSC_VER) ||              \
+#if defined(_WIN32) || defined(__WIN32__) || defined(_MSC_VER) || \
     defined(__MINGW32__)
 /* Win32, DOS, MSVC, MSVS */
 #include <direct.h>
 
 #define STRCLONE(STR) ((STR) ? _strdup(STR) : NULL)
 #define HAS_DEVICE(P)                                                          \
-  ((((P)[0] >= 'A' && (P)[0] <= 'Z') || ((P)[0] >= 'a' && (P)[0] <= 'z')) &&   \
-   (P)[1] == ':')
+    ((((P)[0] >= 'A' && (P)[0] <= 'Z') || ((P)[0] >= 'a' && (P)[0] <= 'z')) && \
+     (P)[1] == ':')
 #define FILESYSTEM_PREFIX_LEN(P) (HAS_DEVICE(P) ? 2 : 0)
 
 #else
 
-#include <unistd.h> // needed for symlink()
+#include <unistd.h>  // needed for symlink()
 #define STRCLONE(STR) ((STR) ? strdup(STR) : NULL)
 
 #endif
@@ -65,13 +65,13 @@
 #define ISSLASH(C) ((C) == '/' || (C) == '\\')
 #endif
 
-#define CLEANUP(ptr)                                                           \
-  do {                                                                         \
-    if (ptr) {                                                                 \
-      free((void *)ptr);                                                       \
-      ptr = NULL;                                                              \
-    }                                                                          \
-  } while (0)
+#define CLEANUP(ptr)           \
+    do {                       \
+        if (ptr) {             \
+            free((void *)ptr); \
+            ptr = NULL;        \
+        }                      \
+    } while (0)
 
 #define UNX_IFDIR 0040000  /* Unix directory */
 #define UNX_IFREG 0100000  /* Unix regular file */
@@ -82,24 +82,24 @@
 #define UNX_IFIFO 0010000  /* Unix fifo    (BCC, not MSC or Amiga) */
 
 struct zip_entry_t {
-    ssize_t index;
-    char *name;
-    mz_uint64 uncomp_size;
-    mz_uint64 comp_size;
-    mz_uint32 uncomp_crc32;
-    mz_uint64 offset;
-    mz_uint8 header[MZ_ZIP_LOCAL_DIR_HEADER_SIZE];
-    mz_uint64 header_offset;
-    mz_uint16 method;
+    ssize_t                 index;
+    char                   *name;
+    mz_uint64               uncomp_size;
+    mz_uint64               comp_size;
+    mz_uint32               uncomp_crc32;
+    mz_uint64               offset;
+    mz_uint8                header[MZ_ZIP_LOCAL_DIR_HEADER_SIZE];
+    mz_uint64               header_offset;
+    mz_uint16               method;
     mz_zip_writer_add_state state;
-    tdefl_compressor comp;
-    mz_uint32 external_attr;
-    time_t m_time;
+    tdefl_compressor        comp;
+    mz_uint32               external_attr;
+    time_t                  m_time;
 };
 
 struct zip_t {
-    mz_zip_archive archive;
-    mz_uint level;
+    mz_zip_archive     archive;
+    mz_uint            level;
     struct zip_entry_t entry;
 };
 
@@ -110,19 +110,18 @@ enum zip_modify_t {
 };
 
 struct zip_entry_mark_t {
-    ssize_t file_index;
+    ssize_t           file_index;
     enum zip_modify_t type;
-    mz_uint64 m_local_header_ofs;
-    size_t lf_length;
+    mz_uint64         m_local_header_ofs;
+    size_t            lf_length;
 };
 
-
-
-static char *zip_strrpl(const char *str, size_t n, char oldchar, char newchar) {
-    char c;
+static char *zip_strrpl(const char *str, size_t n, char oldchar, char newchar)
+{
+    char   c;
     size_t i;
-    char *rpl = (char *)calloc((1 + n), sizeof(char));
-    char *begin = rpl;
+    char  *rpl = (char *)calloc((1 + n), sizeof(char));
+    char  *begin = rpl;
     if (!rpl) {
         return NULL;
     }
@@ -137,9 +136,10 @@ static char *zip_strrpl(const char *str, size_t n, char oldchar, char newchar) {
     return begin;
 }
 
-static int zip_archive_truncate(mz_zip_archive *pzip) {
+static int zip_archive_truncate(mz_zip_archive *pzip)
+{
     mz_zip_internal_state *pState = pzip->m_pState;
-    mz_uint64 file_size = pzip->m_archive_size;
+    mz_uint64              file_size = pzip->m_archive_size;
     if ((pzip->m_pWrite == mz_zip_heap_write_func) && (pState->m_pMem)) {
         return 0;
     }
@@ -152,17 +152,19 @@ static int zip_archive_truncate(mz_zip_archive *pzip) {
     return 0;
 }
 
-static inline void zip_archive_finalize(mz_zip_archive *pzip) {
+static inline void zip_archive_finalize(mz_zip_archive *pzip)
+{
     mz_zip_writer_finalize_archive(pzip);
     zip_archive_truncate(pzip);
 }
 
-int zip_entry_openbyindex(struct zip_t *zip, size_t index) {
-    mz_zip_archive *pZip = NULL;
+int zip_entry_openbyindex(struct zip_t *zip, size_t index)
+{
+    mz_zip_archive          *pZip = NULL;
     mz_zip_archive_file_stat stats;
-    mz_uint namelen;
-    const mz_uint8 *pHeader;
-    const char *pFilename;
+    mz_uint                  namelen;
+    const mz_uint8          *pHeader;
+    const char              *pFilename;
 
     if (!zip) {
         // zip_t handler is not initialized
@@ -181,9 +183,9 @@ int zip_entry_openbyindex(struct zip_t *zip, size_t index) {
     }
 
     if (!(pHeader = &MZ_ZIP_ARRAY_ELEMENT(
-                        &pZip->m_pState->m_central_dir, mz_uint8,
-                        MZ_ZIP_ARRAY_ELEMENT(&pZip->m_pState->m_central_dir_offsets,
-                                mz_uint32, index)))) {
+              &pZip->m_pState->m_central_dir, mz_uint8,
+              MZ_ZIP_ARRAY_ELEMENT(&pZip->m_pState->m_central_dir_offsets,
+                                   mz_uint32, index)))) {
         // cannot find header in central directory
         return ZIP_ENOHDR;
     }
@@ -235,18 +237,19 @@ int zip_entry_openbyindex(struct zip_t *zip, size_t index) {
     return 0;
 }
 
-int zip_entry_close(struct zip_t *zip) {
+int zip_entry_close(struct zip_t *zip)
+{
     mz_zip_archive *pzip = NULL;
-    mz_uint level;
-    tdefl_status done;
-    mz_uint16 entrylen;
-    mz_uint16 dos_time = 0, dos_date = 0;
-    int err = 0;
-    mz_uint8 *pExtra_data = NULL;
-    mz_uint32 extra_size = 0;
-    mz_uint8 extra_data[MZ_ZIP64_MAX_CENTRAL_EXTRA_FIELD_SIZE];
-    mz_uint8 local_dir_footer[MZ_ZIP_DATA_DESCRIPTER_SIZE64];
-    mz_uint32 local_dir_footer_size = MZ_ZIP_DATA_DESCRIPTER_SIZE64;
+    mz_uint         level;
+    tdefl_status    done;
+    mz_uint16       entrylen;
+    mz_uint16       dos_time = 0, dos_date = 0;
+    int             err = 0;
+    mz_uint8       *pExtra_data = NULL;
+    mz_uint32       extra_size = 0;
+    mz_uint8        extra_data[MZ_ZIP64_MAX_CENTRAL_EXTRA_FIELD_SIZE];
+    mz_uint8        local_dir_footer[MZ_ZIP_DATA_DESCRIPTER_SIZE64];
+    mz_uint32       local_dir_footer_size = MZ_ZIP_DATA_DESCRIPTER_SIZE64;
 
     if (!zip) {
         // zip_t handler is not initialized
@@ -292,27 +295,27 @@ int zip_entry_close(struct zip_t *zip) {
 
     pExtra_data = extra_data;
     extra_size = mz_zip_writer_create_zip64_extra_data(
-                     extra_data,
-                     (zip->entry.uncomp_size >= MZ_UINT32_MAX) ? &zip->entry.uncomp_size
-                     : NULL,
-                     (zip->entry.comp_size >= MZ_UINT32_MAX) ? &zip->entry.comp_size : NULL,
-                     (zip->entry.header_offset >= MZ_UINT32_MAX) ? &zip->entry.header_offset
-                     : NULL);
+        extra_data,
+        (zip->entry.uncomp_size >= MZ_UINT32_MAX) ? &zip->entry.uncomp_size
+                                                  : NULL,
+        (zip->entry.comp_size >= MZ_UINT32_MAX) ? &zip->entry.comp_size : NULL,
+        (zip->entry.header_offset >= MZ_UINT32_MAX) ? &zip->entry.header_offset
+                                                    : NULL);
 
     if ((entrylen) && (zip->entry.name[entrylen - 1] == '/') &&
-            !zip->entry.uncomp_size) {
+        !zip->entry.uncomp_size) {
         /* Set DOS Subdirectory attribute bit. */
         zip->entry.external_attr |= MZ_ZIP_DOS_DIR_ATTRIBUTE_BITFLAG;
     }
 
     if (!mz_zip_writer_add_to_central_dir(
-                pzip, zip->entry.name, entrylen, pExtra_data, (mz_uint16)extra_size,
-                "", 0, zip->entry.uncomp_size, zip->entry.comp_size,
-                zip->entry.uncomp_crc32, zip->entry.method,
-                MZ_ZIP_GENERAL_PURPOSE_BIT_FLAG_UTF8 |
+            pzip, zip->entry.name, entrylen, pExtra_data, (mz_uint16)extra_size,
+            "", 0, zip->entry.uncomp_size, zip->entry.comp_size,
+            zip->entry.uncomp_crc32, zip->entry.method,
+            MZ_ZIP_GENERAL_PURPOSE_BIT_FLAG_UTF8 |
                 MZ_ZIP_LDH_BIT_FLAG_HAS_LOCATOR,
-                dos_time, dos_date, zip->entry.header_offset,
-                zip->entry.external_attr, NULL, 0)) {
+            dos_time, dos_date, zip->entry.header_offset,
+            zip->entry.external_attr, NULL, 0)) {
         // Cannot write to zip central dir
         err = ZIP_EWRTDIR;
         goto cleanup;
@@ -329,7 +332,8 @@ cleanup:
     return err;
 }
 
-const char *zip_entry_name(struct zip_t *zip) {
+const char *zip_entry_name(struct zip_t *zip)
+{
     if (!zip) {
         // zip_t handler is not initialized
         return NULL;
@@ -338,10 +342,11 @@ const char *zip_entry_name(struct zip_t *zip) {
     return zip->entry.name;
 }
 
-int zip_entry_write(struct zip_t *zip, const void *buf, size_t bufsize) {
-    mz_uint level;
+int zip_entry_write(struct zip_t *zip, const void *buf, size_t bufsize)
+{
+    mz_uint         level;
     mz_zip_archive *pzip = NULL;
-    tdefl_status status;
+    tdefl_status    status;
 
     if (!zip) {
         // zip_t handler is not initialized
@@ -352,7 +357,7 @@ int zip_entry_write(struct zip_t *zip, const void *buf, size_t bufsize) {
     if (buf && bufsize > 0) {
         zip->entry.uncomp_size += bufsize;
         zip->entry.uncomp_crc32 = (mz_uint32)mz_crc32(
-                                      zip->entry.uncomp_crc32, (const mz_uint8 *)buf, bufsize);
+            zip->entry.uncomp_crc32, (const mz_uint8 *)buf, bufsize);
 
         level = zip->level & 0xF;
         if (!level) {
@@ -376,10 +381,11 @@ int zip_entry_write(struct zip_t *zip, const void *buf, size_t bufsize) {
     return 0;
 }
 
-ssize_t zip_entry_read(struct zip_t *zip, void **buf, size_t *bufsize) {
+ssize_t zip_entry_read(struct zip_t *zip, void **buf, size_t *bufsize)
+{
     mz_zip_archive *pzip = NULL;
-    mz_uint idx;
-    size_t size = 0;
+    mz_uint         idx;
+    size_t          size = 0;
 
     if (!zip) {
         // zip_t handler is not initialized
@@ -388,7 +394,7 @@ ssize_t zip_entry_read(struct zip_t *zip, void **buf, size_t *bufsize) {
 
     pzip = &(zip->archive);
     if (pzip->m_zip_mode != MZ_ZIP_MODE_READING ||
-            zip->entry.index < (ssize_t)0) {
+        zip->entry.index < (ssize_t)0) {
         // the entry is not found or we do not have read access
         return (ssize_t)ZIP_ENOENT;
     }
@@ -407,7 +413,8 @@ ssize_t zip_entry_read(struct zip_t *zip, void **buf, size_t *bufsize) {
 }
 
 struct zip_t *zip_stream_open(const char *stream, size_t size, int level,
-                              char mode) {
+                              char mode)
+{
     struct zip_t *zip = (struct zip_t *)calloc((size_t)1, sizeof(struct zip_t));
     if (!zip) {
         return NULL;
@@ -442,7 +449,8 @@ cleanup:
     return NULL;
 }
 
-void zip_stream_close(struct zip_t *zip) {
+void zip_stream_close(struct zip_t *zip)
+{
     if (zip) {
         mz_zip_writer_end(&(zip->archive));
         mz_zip_reader_end(&(zip->archive));

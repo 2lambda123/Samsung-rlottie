@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-//#define DEBUG_PARSER
+// #define DEBUG_PARSER
 
 // This parser implements JSON token-by-token parsing with an API that is
 // more direct; we don't have to create  handler object and
@@ -112,9 +112,7 @@ public:
         v_.SetDouble(d);
         return true;
     }
-    bool RawNumber(const char *, SizeType, bool) {
-        return false;
-    }
+    bool RawNumber(const char *, SizeType, bool) { return false; }
     bool String(const char *str, SizeType length, bool)
     {
         st_ = kHasString;
@@ -148,10 +146,8 @@ public:
         return true;
     }
 
-    void Error()
-    {
-        st_ = kError;
-    }
+    void Error() { st_ = kError; }
+
 protected:
     explicit LookaheadParserHandler(char *str);
 
@@ -190,16 +186,14 @@ public:
     bool ParseNext();
 
 public:
-    VArenaAlloc &allocator() {
-        return compRef->mArenaAlloc;
-    }
+    VArenaAlloc &allocator() { return compRef->mArenaAlloc; }
     bool         EnterObject();
     bool         EnterArray();
-    const char * NextObjectKey();
+    const char  *NextObjectKey();
     bool         NextArrayValue();
     int          GetInt();
     double       GetDouble();
-    const char * GetString();
+    const char  *GetString();
     std::string  GetStringObject();
     bool         GetBool();
     void         GetNull();
@@ -209,9 +203,7 @@ public:
     void   SkipValue();
     Value *PeekValue();
     int    PeekType() const;
-    bool   IsValid() {
-        return st_ != kError;
-    }
+    bool   IsValid() { return st_ != kError; }
 
     void                  Skip(const char *key);
     model::BlendMode      getBlendMode();
@@ -226,34 +218,34 @@ public:
     {
         return mComposition;
     }
-    void             parseComposition();
-    void             parseMarkers();
-    void             parseMarker();
-    void             parseAssets(model::Composition *comp);
-    model::Asset *   parseAsset();
-    void             parseLayers(model::Composition *comp);
-    model::Layer *   parseLayer();
-    void             parseMaskProperty(model::Layer *layer);
-    void             parseShapesAttr(model::Layer *layer);
-    void             parseObject(model::Group *parent);
-    model::Mask *    parseMaskObject();
-    model::Object *  parseObjectTypeAttr();
-    model::Object *  parseGroupObject();
-    model::Rect *    parseRectObject();
-    model::RoundedCorner *    parseRoundedCorner();
+    void                  parseComposition();
+    void                  parseMarkers();
+    void                  parseMarker();
+    void                  parseAssets(model::Composition *comp);
+    model::Asset         *parseAsset();
+    void                  parseLayers(model::Composition *comp);
+    model::Layer         *parseLayer();
+    void                  parseMaskProperty(model::Layer *layer);
+    void                  parseShapesAttr(model::Layer *layer);
+    void                  parseObject(model::Group *parent);
+    model::Mask          *parseMaskObject();
+    model::Object        *parseObjectTypeAttr();
+    model::Object        *parseGroupObject();
+    model::Rect          *parseRectObject();
+    model::RoundedCorner *parseRoundedCorner();
     void updateRoundedCorner(model::Group *parent, model::RoundedCorner *rc);
 
-    model::Ellipse * parseEllipseObject();
-    model::Path *    parseShapeObject();
+    model::Ellipse  *parseEllipseObject();
+    model::Path     *parseShapeObject();
     model::Polystar *parsePolystarObject();
 
-    model::Transform *     parseTransformObject(bool ddd = false);
-    model::Fill *          parseFillObject();
-    model::GradientFill *  parseGFillObject();
-    model::Stroke *        parseStrokeObject();
+    model::Transform      *parseTransformObject(bool ddd = false);
+    model::Fill           *parseFillObject();
+    model::GradientFill   *parseGFillObject();
+    model::Stroke         *parseStrokeObject();
     model::GradientStroke *parseGStrokeObject();
-    model::Trim *          parseTrimObject();
-    model::Repeater *      parseReapeaterObject();
+    model::Trim           *parseTrimObject();
+    model::Repeater       *parseReapeaterObject();
 
     void parseGradientProperty(model::Gradient *gradient, const char *key);
 
@@ -275,7 +267,7 @@ public:
     }
 
     template <typename T>
-    bool parseKeyFrameValue(const char *                      key,
+    bool parseKeyFrameValue(const char                       *key,
                             model::Value<T, model::Position> &value);
     template <typename T, typename Tag>
     void parseKeyFrame(model::KeyFrames<T, Tag> &obj);
@@ -318,7 +310,7 @@ private:
              * is closed one)
              */
             if (mInPoint.size() != mOutPoint.size() ||
-                    mInPoint.size() != mVertices.size()) {
+                mInPoint.size() != mVertices.size()) {
                 mResult.clear();
             } else {
                 auto size = mVertices.size();
@@ -372,8 +364,8 @@ private:
 protected:
     std::unordered_map<std::string, VInterpolator *> mInterpolatorCache;
     std::shared_ptr<model::Composition>              mComposition;
-    model::Composition *                             compRef{nullptr};
-    model::Layer *                                   curLayerRef{nullptr};
+    model::Composition                              *compRef{nullptr};
+    model::Layer                                    *curLayerRef{nullptr};
     std::vector<model::Layer *>                      mLayersToUpdate;
     std::string                                      mDirPath;
     void                                             SkipOut(int depth);
@@ -762,8 +754,7 @@ static constexpr const unsigned char B64index[256] = {
     58, 59, 60, 61, 0,  0,  0,  0,  0,  0,  0,  0,  1,  2,  3,  4,  5,  6,
     7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
     25, 0,  0,  0,  0,  63, 0,  26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
-    37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
-};
+    37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51};
 
 std::string b64decode(const char *data, const size_t len)
 {
@@ -989,7 +980,8 @@ model::Layer *LottieParserImpl::parseLayer()
             layer->setName(GetString());
         } else if (0 == strcmp(key, "ind")) {
             /*Layer index in AE. Used for
-                                                     parenting and expressions.*/
+                                                     parenting and
+               expressions.*/
             layer->mId = GetInt();
         } else if (0 == strcmp(key, "ddd")) { /*3d layer */
             ddd = GetInt();
@@ -1160,7 +1152,7 @@ model::Object *LottieParserImpl::parseObjectTypeAttr()
     } else if (0 == strcmp(type, "rd")) {
         curLayerRef->mHasRoundedCorner = true;
         return parseRoundedCorner();
-    }  else if (0 == strcmp(type, "el")) {
+    } else if (0 == strcmp(type, "el")) {
         return parseEllipseObject();
     } else if (0 == strcmp(type, "tr")) {
         return parseTransformObject();
@@ -1203,7 +1195,8 @@ void LottieParserImpl::parseObject(model::Group *parent)
             auto child = parseObjectTypeAttr();
             if (child && !child->hidden()) {
                 if (child->type() == model::Object::Type::RoundedCorner) {
-                    updateRoundedCorner(parent, static_cast<model::RoundedCorner *>(child));
+                    updateRoundedCorner(
+                        parent, static_cast<model::RoundedCorner *>(child));
                 }
                 parent->mChildren.push_back(child);
             }
@@ -1213,10 +1206,10 @@ void LottieParserImpl::parseObject(model::Group *parent)
     }
 }
 
-void LottieParserImpl::updateRoundedCorner(model::Group *group, model::RoundedCorner *rc)
+void LottieParserImpl::updateRoundedCorner(model::Group         *group,
+                                           model::RoundedCorner *rc)
 {
-    for(auto &e : group->mChildren)
-    {
+    for (auto &e : group->mChildren) {
         if (e->type() == model::Object::Type::Rect) {
             static_cast<model::Rect *>(e)->mRoundedCorner = rc;
             if (!rc->isStatic()) {
@@ -1224,7 +1217,7 @@ void LottieParserImpl::updateRoundedCorner(model::Group *group, model::RoundedCo
                 group->setStatic(false);
                 //@TODO need to propagate.
             }
-        } else if ( e->type() == model::Object::Type::Group) {
+        } else if (e->type() == model::Object::Type::Group) {
             updateRoundedCorner(static_cast<model::Group *>(e), rc);
         }
     }
@@ -1242,9 +1235,9 @@ model::Object *LottieParserImpl::parseGroupObject()
             while (NextArrayValue()) {
                 parseObject(group);
             }
-            if (!group->mChildren.empty()
-                    && group->mChildren.back()->type()
-                    == model::Object::Type::Transform) {
+            if (!group->mChildren.empty() &&
+                group->mChildren.back()->type() ==
+                    model::Object::Type::Transform) {
                 group->mTransform =
                     static_cast<model::Transform *>(group->mChildren.back());
                 group->mChildren.pop_back();
@@ -1729,7 +1722,7 @@ model::Stroke *LottieParserImpl::parseStrokeObject()
 }
 
 void LottieParserImpl::parseGradientProperty(model::Gradient *obj,
-        const char *     key)
+                                             const char      *key)
 {
     if (0 == strcmp(key, "t")) {
         obj->mGradientType = GetInt();
@@ -1991,8 +1984,8 @@ bool LottieParserImpl::parseKeyFrameValue(
 }
 
 VInterpolator *LottieParserImpl::interpolator(VPointF     inTangent,
-        VPointF     outTangent,
-        std::string key)
+                                              VPointF     outTangent,
+                                              std::string key)
 {
     if (key.empty()) {
         std::array<char, 20> temp;
@@ -2092,7 +2085,7 @@ void LottieParserImpl::parseKeyFrame(model::KeyFrames<T, Tag> &obj)
         list.push_back(std::move(keyframe));
     } else if (parsed.interpolator) {
         keyframe.interpolator_ = interpolator(
-                                     inTangent, outTangent, std::move(parsed.interpolatorKey));
+            inTangent, outTangent, std::move(parsed.interpolatorKey));
         list.push_back(std::move(keyframe));
     } else {
         // its the last frame discard.
@@ -2374,9 +2367,9 @@ public:
 
 #endif
 
-static char* uncompressZip(const char * str, size_t length)
+static char *uncompressZip(const char *str, size_t length)
 {
-    const char* errMsg = "Failed to unzip dotLottie!";
+    const char *errMsg = "Failed to unzip dotLottie!";
 
     auto zip = zip_stream_open(str, length, 0, 'r');
     if (!zip) {
@@ -2384,15 +2377,15 @@ static char* uncompressZip(const char * str, size_t length)
         return nullptr;
     }
 
-    //Read a representive animation
+    // Read a representive animation
     if (zip_entry_openbyindex(zip, 1)) {
         vCritical << errMsg;
         return nullptr;
     }
 
-    char* buf = nullptr;
+    char  *buf = nullptr;
     size_t bufSize;
-    zip_entry_read(zip, (void**)&buf, &bufSize);
+    zip_entry_read(zip, (void **)&buf, &bufSize);
 
     zip_entry_close(zip);
     zip_stream_close(zip);
@@ -2400,17 +2393,18 @@ static char* uncompressZip(const char * str, size_t length)
     return buf;
 }
 
-static bool checkDotLottie(const char * str)
+static bool checkDotLottie(const char *str)
 {
-    //check the .Lottie signature.
-    if (str[0] == 0x50 && str[1] == 0x4B && str[2] == 0x03 && str[3] == 0x04) return true;
-    else return false;
+    // check the .Lottie signature.
+    if (str[0] == 0x50 && str[1] == 0x4B && str[2] == 0x03 && str[3] == 0x04)
+        return true;
+    else
+        return false;
 }
 
-std::shared_ptr<model::Composition> model::parse(char *             str,
-        size_t             length,
-        std::string        dir_path,
-        model::ColorFilter filter)
+std::shared_ptr<model::Composition> model::parse(char *str, size_t length,
+                                                 std::string        dir_path,
+                                                 model::ColorFilter filter)
 {
     auto input = str;
 
