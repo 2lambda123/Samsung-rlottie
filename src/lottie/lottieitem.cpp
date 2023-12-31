@@ -118,7 +118,7 @@ bool renderer::Composition::update(int frameNo, const VSize &size,
 {
     // check if cached frame is same as requested frame.
     if ((mViewSize == size) && (mCurFrameNo == frameNo) &&
-        (mKeepAspectRatio == keepAspectRatio))
+            (mKeepAspectRatio == keepAspectRatio))
         return false;
 
     mViewSize = size;
@@ -331,7 +331,8 @@ VRle renderer::LayerMask::maskRle(const VRect &clipRect)
                 return clipRect - e.rle();
             else
                 return e.rle();
-        }();
+        }
+        ();
 
         switch (e.maskMode()) {
         case model::Mask::Mode::Add: {
@@ -385,7 +386,7 @@ bool renderer::Layer::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
 
     if (!keyPath.skip(name())) {
         if (keyPath.fullyResolvesTo(name(), depth) &&
-            transformProp(value.property())) {
+                transformProp(value.property())) {
             //@TODO handle propery update.
         }
     }
@@ -393,7 +394,7 @@ bool renderer::Layer::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
 }
 
 bool renderer::ShapeLayer::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
-                                          LOTVariant &value)
+        LOTVariant &value)
 {
     if (renderer::Layer::resolveKeyPath(keyPath, depth, value)) {
         if (keyPath.propagate(name(), depth)) {
@@ -406,7 +407,7 @@ bool renderer::ShapeLayer::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
 }
 
 bool renderer::CompLayer::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
-                                         LOTVariant &value)
+        LOTVariant &value)
 {
     if (renderer::Layer::resolveKeyPath(keyPath, depth, value)) {
         if (keyPath.propagate(name(), depth)) {
@@ -456,7 +457,7 @@ void renderer::Layer::update(int frameNumber, const VMatrix &parentMatrix,
 
     // 5. if no parent property change and layer is static then nothing to do.
     if (!mLayerData->precompLayer() && flag().testFlag(DirtyFlagBit::None) &&
-        isStatic())
+            isStatic())
         return;
 
     // 6. update the content of the layer
@@ -469,8 +470,8 @@ void renderer::Layer::update(int frameNumber, const VMatrix &parentMatrix,
 VMatrix renderer::Layer::matrix(int frameNo) const
 {
     return mParentLayer
-               ? (mLayerData->matrix(frameNo) * mParentLayer->matrix(frameNo))
-               : mLayerData->matrix(frameNo);
+           ? (mLayerData->matrix(frameNo) * mParentLayer->matrix(frameNo))
+           : mLayerData->matrix(frameNo);
 }
 
 bool renderer::Layer::visible() const
@@ -499,7 +500,7 @@ renderer::CompLayer::CompLayer(model::Layer *layerModel, VArenaAlloc *allocator)
     // 1. keep the layer in back-to-front order.
     // as lottie model keeps the data in front-toback-order.
     for (auto it = mLayerData->mChildren.crbegin();
-         it != mLayerData->mChildren.rend(); ++it) {
+            it != mLayerData->mChildren.rend(); ++it) {
         auto model = static_cast<model::Layer *>(*it);
         auto item = createLayerItem(model, allocator);
         if (item) mLayers.push_back(item);
@@ -511,7 +512,9 @@ renderer::CompLayer::CompLayer(model::Layer *layerModel, VArenaAlloc *allocator)
         if (id >= 0) {
             auto search =
                 std::find_if(mLayers.begin(), mLayers.end(),
-                             [id](const auto &val) { return val->id() == id; });
+            [id](const auto &val) {
+                return val->id() == id;
+            });
             if (search != mLayers.end()) layer->setParentLayer(*search);
         }
     }
@@ -588,10 +591,10 @@ void renderer::CompLayer::renderHelper(VPainter *    painter,
 }
 
 void renderer::CompLayer::renderMatteLayer(VPainter *painter, const VRle &mask,
-                                           const VRle &     matteRle,
-                                           renderer::Layer *layer,
-                                           renderer::Layer *src,
-                                           SurfaceCache &   cache)
+        const VRle &     matteRle,
+        renderer::Layer *layer,
+        renderer::Layer *src,
+        SurfaceCache &   cache)
 {
     VSize size = painter->clipBoundingRect().size();
     // Decide if we can use fast matte.
@@ -626,7 +629,7 @@ void renderer::CompLayer::renderMatteLayer(VPainter *painter, const VRle &mask,
 
     // 2.2 update srcBuffer if the matte is luma type
     if (layer->matteType() == model::MatteType::Luma ||
-        layer->matteType() == model::MatteType::LumaInv) {
+            layer->matteType() == model::MatteType::LumaInv) {
         srcBitmap.updateLuma();
     }
 
@@ -723,7 +726,7 @@ void renderer::SolidLayer::updateContent()
     if (flag() & DirtyFlagBit::Matrix) {
         mPath.reset();
         mPath.addRect(VRectF(0, 0, mLayerData->layerSize().width(),
-                            mLayerData->layerSize().height()));
+                             mLayerData->layerSize().height()));
         mPath.transform(combinedMatrix());
         mRenderNode.mFlag |= VDrawable::DirtyState::Path;
         mRenderNode.mPath = mPath;
@@ -767,7 +770,7 @@ void renderer::ImageLayer::updateContent()
     if (flag() & DirtyFlagBit::Matrix) {
         mPath.reset();
         mPath.addRect(VRectF(0, 0, mLayerData->asset()->mWidth,
-                            mLayerData->asset()->mHeight));
+                             mLayerData->asset()->mHeight));
         mPath.transform(combinedMatrix());
         mRenderNode.mFlag |= VDrawable::DirtyState::Path;
         mRenderNode.mPath = mPath;
@@ -798,52 +801,52 @@ renderer::NullLayer::NullLayer(model::Layer *layerData)
 void renderer::NullLayer::updateContent() {}
 
 static renderer::Object *createContentItem(model::Object *contentData,
-                                           VArenaAlloc *  allocator)
+        VArenaAlloc *  allocator)
 {
     switch (contentData->type()) {
     case model::Object::Type::Group: {
         return allocator->make<renderer::Group>(
-            static_cast<model::Group *>(contentData), allocator);
+                   static_cast<model::Group *>(contentData), allocator);
     }
     case model::Object::Type::Rect: {
         return allocator->make<renderer::Rect>(
-            static_cast<model::Rect *>(contentData));
+                   static_cast<model::Rect *>(contentData));
     }
     case model::Object::Type::Ellipse: {
         return allocator->make<renderer::Ellipse>(
-            static_cast<model::Ellipse *>(contentData));
+                   static_cast<model::Ellipse *>(contentData));
     }
     case model::Object::Type::Path: {
         return allocator->make<renderer::Path>(
-            static_cast<model::Path *>(contentData));
+                   static_cast<model::Path *>(contentData));
     }
     case model::Object::Type::Polystar: {
         return allocator->make<renderer::Polystar>(
-            static_cast<model::Polystar *>(contentData));
+                   static_cast<model::Polystar *>(contentData));
     }
     case model::Object::Type::Fill: {
         return allocator->make<renderer::Fill>(
-            static_cast<model::Fill *>(contentData));
+                   static_cast<model::Fill *>(contentData));
     }
     case model::Object::Type::GFill: {
         return allocator->make<renderer::GradientFill>(
-            static_cast<model::GradientFill *>(contentData));
+                   static_cast<model::GradientFill *>(contentData));
     }
     case model::Object::Type::Stroke: {
         return allocator->make<renderer::Stroke>(
-            static_cast<model::Stroke *>(contentData));
+                   static_cast<model::Stroke *>(contentData));
     }
     case model::Object::Type::GStroke: {
         return allocator->make<renderer::GradientStroke>(
-            static_cast<model::GradientStroke *>(contentData));
+                   static_cast<model::GradientStroke *>(contentData));
     }
     case model::Object::Type::Repeater: {
         return allocator->make<renderer::Repeater>(
-            static_cast<model::Repeater *>(contentData), allocator);
+                   static_cast<model::Repeater *>(contentData), allocator);
     }
     case model::Object::Type::Trim: {
         return allocator->make<renderer::Trim>(
-            static_cast<model::Trim *>(contentData));
+                   static_cast<model::Trim *>(contentData));
     }
     default:
         return nullptr;
@@ -906,7 +909,7 @@ bool renderer::Group::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
 
         if (!keyPath.skip(mModel.name())) {
             if (keyPath.fullyResolvesTo(mModel.name(), depth) &&
-                transformProp(value.property())) {
+                    transformProp(value.property())) {
                 mModel.filter()->addValue(value);
             }
         }
@@ -929,7 +932,7 @@ bool renderer::Fill::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
     }
 
     if (keyPath.fullyResolvesTo(mModel.name(), depth) &&
-        fillProp(value.property())) {
+            fillProp(value.property())) {
         mModel.filter()->addValue(value);
         return true;
     }
@@ -944,7 +947,7 @@ bool renderer::Stroke::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
     }
 
     if (keyPath.fullyResolvesTo(mModel.name(), depth) &&
-        strokeProp(value.property())) {
+            strokeProp(value.property())) {
         mModel.filter()->addValue(value);
         return true;
     }
@@ -966,7 +969,7 @@ void renderer::Group::addChildren(model::Group *data, VArenaAlloc *allocator)
     // keep the content in back-to-front order.
     // as lottie model keeps it in front-to-back order.
     for (auto it = data->mChildren.crbegin(); it != data->mChildren.rend();
-         ++it) {
+            ++it) {
         auto content = createContentItem(*it, allocator);
         if (content) {
             mContents.push_back(content);
@@ -985,7 +988,7 @@ void renderer::Group::update(int frameNo, const VMatrix &parentMatrix,
 
         m *= parentMatrix;
         if (!(flag & DirtyFlagBit::Matrix) && !mModel.transform()->isStatic() &&
-            (m != mMatrix)) {
+                (m != mMatrix)) {
             newFlag |= DirtyFlagBit::Matrix;
         }
 
@@ -1045,7 +1048,7 @@ void renderer::Group::processPaintItems(std::vector<renderer::Shape *> &list)
         }
         case renderer::Object::Type::Paint: {
             static_cast<renderer::Paint *>(content)->addPathItems(list,
-                                                                  curOpCount);
+                    curOpCount);
             break;
         }
         case renderer::Object::Type::Group: {
@@ -1071,7 +1074,7 @@ void renderer::Group::processTrimItems(std::vector<renderer::Shape *> &list)
         }
         case renderer::Object::Type::Trim: {
             static_cast<renderer::Trim *>(content)->addPathItems(list,
-                                                                 curOpCount);
+                    curOpCount);
             break;
         }
         case renderer::Object::Type::Group: {
@@ -1142,7 +1145,7 @@ void renderer::Rect::updatePath(VPath &path, int frameNo)
     VPointF size = mData->mSize.value(frameNo);
     float   roundness = mData->roundness(frameNo);
     VRectF  r(pos.x() - size.x() / 2, pos.y() - size.y() / 2, size.x(),
-             size.y());
+              size.y());
 
     path.reset();
     path.addRoundRect(r, roundness, mData->direction());
@@ -1158,7 +1161,7 @@ void renderer::Ellipse::updatePath(VPath &path, int frameNo)
     VPointF pos = mData->mPos.value(frameNo);
     VPointF size = mData->mSize.value(frameNo);
     VRectF  r(pos.x() - size.x() / 2, pos.y() - size.y() / 2, size.x(),
-             size.y());
+              size.y());
 
     path.reset();
     path.addOval(r, mData->direction());
@@ -1290,7 +1293,7 @@ renderer::GradientFill::GradientFill(model::GradientFill *data)
 }
 
 bool renderer::GradientFill::updateContent(int frameNo, const VMatrix &matrix,
-                                           float alpha)
+        float alpha)
 {
     float combinedAlpha = alpha * mData->opacity(frameNo);
 
@@ -1353,7 +1356,7 @@ renderer::GradientStroke::GradientStroke(model::GradientStroke *data)
 }
 
 bool renderer::GradientStroke::updateContent(int frameNo, const VMatrix &matrix,
-                                             float alpha)
+        float alpha)
 {
     float combinedAlpha = alpha * mData->opacity(frameNo);
 
@@ -1387,7 +1390,7 @@ void renderer::Trim::update(int frameNo, const VMatrix & /*parentMatrix*/,
     model::Trim::Segment segment = mData->segment(frameNo);
 
     if (!(vCompare(mCache.mSegment.start, segment.start) &&
-          vCompare(mCache.mSegment.end, segment.end))) {
+            vCompare(mCache.mSegment.end, segment.end))) {
         mDirty = true;
         mCache.mSegment = segment;
     }
@@ -1475,7 +1478,7 @@ renderer::Repeater::Repeater(model::Repeater *data, VArenaAlloc *allocator)
 
     for (int i = 0; i < mCopies; i++) {
         auto content = allocator->make<renderer::Group>(
-            mRepeaterData->content(), allocator);
+                           mRepeaterData->content(), allocator);
         // content->setParent(this);
         mContents.push_back(content);
     }

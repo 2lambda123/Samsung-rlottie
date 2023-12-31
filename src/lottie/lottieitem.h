@@ -59,13 +59,27 @@ public:
     VSpan() = default;
     VSpan(pointer data, index_type size) : _data(data), _size(size) {}
 
-    constexpr pointer        data() const noexcept { return _data; }
-    constexpr index_type     size() const noexcept { return _size; }
-    constexpr bool           empty() const noexcept { return size() == 0; }
-    constexpr iterator       begin() const noexcept { return data(); }
-    constexpr iterator       end() const noexcept { return data() + size(); }
-    constexpr const_iterator cbegin() const noexcept { return data(); }
-    constexpr const_iterator cend() const noexcept { return data() + size(); }
+    constexpr pointer        data() const noexcept {
+        return _data;
+    }
+    constexpr index_type     size() const noexcept {
+        return _size;
+    }
+    constexpr bool           empty() const noexcept {
+        return size() == 0;
+    }
+    constexpr iterator       begin() const noexcept {
+        return data();
+    }
+    constexpr iterator       end() const noexcept {
+        return data() + size();
+    }
+    constexpr const_iterator cbegin() const noexcept {
+        return data();
+    }
+    constexpr const_iterator cend() const noexcept {
+        return data() + size();
+    }
     constexpr reference      operator[](index_type idx) const
     {
         return *(data() + idx);
@@ -90,7 +104,9 @@ typedef vFlag<DirtyFlagBit> DirtyFlag;
 
 class SurfaceCache {
 public:
-    SurfaceCache() { mCache.reserve(10); }
+    SurfaceCache() {
+        mCache.reserve(10);
+    }
 
     VBitmap make_surface(
         size_t width, size_t height,
@@ -105,8 +121,12 @@ public:
         return surface;
     }
 
-    void release_surface(VBitmap &surface) { mCache.push_back(surface); }
-    bool is_layer_surface_created() const { return mIsLayerBitmapCreated; }
+    void release_surface(VBitmap &surface) {
+        mCache.push_back(surface);
+    }
+    bool is_layer_surface_created() const {
+        return mIsLayerBitmapCreated;
+    }
     void create_layer_surface(size_t width, size_t height, VBitmap::Format format)
     {
         if (mIsLayerBitmapCreated) return;
@@ -123,8 +143,12 @@ public:
         mBitmapPainter.reset();
         mIsLayerBitmapCreated = false;
     }
-    VPainter* get_layer_painter() const { return mBitmapPainter.get(); }
-    VBitmap* get_layer_surface() const { return mLayerBitmap.get(); }
+    VPainter* get_layer_painter() const {
+        return mBitmapPainter.get();
+    }
+    VBitmap* get_layer_surface() const {
+        return mLayerBitmap.get();
+    }
 
 private:
     std::vector<VBitmap> mCache;
@@ -175,10 +199,14 @@ public:
     explicit Mask(model::Mask *data) : mData(data) {}
     void update(int frameNo, const VMatrix &parentMatrix, float parentAlpha,
                 const DirtyFlag &flag);
-    model::Mask::Mode maskMode() const { return mData->mMode; }
+    model::Mask::Mode maskMode() const {
+        return mData->mMode;
+    }
     VRle              rle();
     void              preprocess(const VRect &clip);
-    bool              inverted() const { return mData->mInv; }
+    bool              inverted() const {
+        return mData->mInv;
+    }
 public:
     model::Mask *mData{nullptr};
     VPath        mLocalPath;
@@ -196,7 +224,9 @@ public:
     explicit LayerMask(model::Layer *layerData);
     void update(int frameNo, const VMatrix &parentMatrix, float parentAlpha,
                 const DirtyFlag &flag);
-    bool isStatic() const { return mStatic; }
+    bool isStatic() const {
+        return mStatic;
+    }
     VRle maskRle(const VRect &clipRect);
     void preprocess(const VRect &clip);
 
@@ -213,7 +243,9 @@ class Composition {
 public:
     explicit Composition(std::shared_ptr<model::Composition> composition);
     bool  update(int frameNo, const VSize &size, bool keepAspectRatio);
-    VSize size() const { return mViewSize; }
+    VSize size() const {
+        return mViewSize;
+    }
     void  buildRenderTree();
     const LOTLayerNode *renderTree() const;
     bool                render(const rlottie::Surface &surface);
@@ -236,16 +268,28 @@ public:
     virtual ~Layer() = default;
     Layer &operator=(Layer &&) noexcept = delete;
     Layer(model::Layer *layerData);
-    int          id() const { return mLayerData->id(); }
-    int          parentId() const { return mLayerData->parentId(); }
-    void         setParentLayer(Layer *parent) { mParentLayer = parent; }
-    void         setComplexContent(bool value) { mComplexContent = value; }
-    bool         complexContent() const { return mComplexContent; }
+    int          id() const {
+        return mLayerData->id();
+    }
+    int          parentId() const {
+        return mLayerData->parentId();
+    }
+    void         setParentLayer(Layer *parent) {
+        mParentLayer = parent;
+    }
+    void         setComplexContent(bool value) {
+        mComplexContent = value;
+    }
+    bool         complexContent() const {
+        return mComplexContent;
+    }
     virtual void update(int frameNo, const VMatrix &parentMatrix,
                         float parentAlpha);
     VMatrix      matrix(int frameNo) const;
     void         preprocess(const VRect &clip);
-    virtual DrawableList renderList() { return {}; }
+    virtual DrawableList renderList() {
+        return {};
+    }
     virtual void         render(VPainter *painter, const VRle &mask,
                                 const VRle &matteRle, SurfaceCache &cache);
     bool                 hasMatte()
@@ -253,26 +297,50 @@ public:
         if (mLayerData->mMatteType == model::MatteType::None) return false;
         return true;
     }
-    model::MatteType matteType() const { return mLayerData->mMatteType; }
+    model::MatteType matteType() const {
+        return mLayerData->mMatteType;
+    }
     bool             visible() const;
     virtual void     buildLayerNode();
-    LOTLayerNode &   clayer() { return mCApiData->mLayer; }
-    std::vector<LOTLayerNode *> &clayers() { return mCApiData->mLayers; }
-    std::vector<LOTMask> &       cmasks() { return mCApiData->mMasks; }
-    std::vector<LOTNode *> &     cnodes() { return mCApiData->mCNodeList; }
-    const char *                 name() const { return mLayerData->name(); }
+    LOTLayerNode &   clayer() {
+        return mCApiData->mLayer;
+    }
+    std::vector<LOTLayerNode *> &clayers() {
+        return mCApiData->mLayers;
+    }
+    std::vector<LOTMask> &       cmasks() {
+        return mCApiData->mMasks;
+    }
+    std::vector<LOTNode *> &     cnodes() {
+        return mCApiData->mCNodeList;
+    }
+    const char *                 name() const {
+        return mLayerData->name();
+    }
     virtual bool resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
                                 LOTVariant &value);
 
 protected:
     virtual void   preprocessStage(const VRect &clip) = 0;
     virtual void   updateContent() = 0;
-    inline VMatrix combinedMatrix() const { return mCombinedMatrix; }
-    inline int     frameNo() const { return mFrameNo; }
-    inline float   combinedAlpha() const { return mCombinedAlpha; }
-    inline bool    isStatic() const { return mLayerData->isStatic(); }
-    float opacity(int frameNo) const { return mLayerData->opacity(frameNo); }
-    inline DirtyFlag flag() const { return mDirtyFlag; }
+    inline VMatrix combinedMatrix() const {
+        return mCombinedMatrix;
+    }
+    inline int     frameNo() const {
+        return mFrameNo;
+    }
+    inline float   combinedAlpha() const {
+        return mCombinedAlpha;
+    }
+    inline bool    isStatic() const {
+        return mLayerData->isStatic();
+    }
+    float opacity(int frameNo) const {
+        return mLayerData->opacity(frameNo);
+    }
+    inline DirtyFlag flag() const {
+        return mDirtyFlag;
+    }
     bool             skipRendering() const
     {
         return (!visible() || vIsZero(combinedAlpha()));
@@ -387,7 +455,9 @@ public:
     {
         return false;
     }
-    virtual Object::Type type() const { return Object::Type::Unknown; }
+    virtual Object::Type type() const {
+        return Object::Type::Unknown;
+    }
 };
 
 class Shape;
@@ -402,8 +472,12 @@ public:
     void processTrimItems(std::vector<Shape *> &list);
     void processPaintItems(std::vector<Shape *> &list);
     void renderList(std::vector<VDrawable *> &list) override;
-    Object::Type   type() const final { return Object::Type::Group; }
-    const VMatrix &matrix() const { return mMatrix; }
+    Object::Type   type() const final {
+        return Object::Type::Group;
+    }
+    const VMatrix &matrix() const {
+        return mMatrix;
+    }
     const char *   name() const
     {
         static const char *TAG = "__";
@@ -425,18 +499,30 @@ public:
     Shape(bool staticPath) : mStaticPath(staticPath) {}
     void update(int frameNo, const VMatrix &parentMatrix, float parentAlpha,
                 const DirtyFlag &flag) final;
-    Object::Type type() const final { return Object::Type::Shape; }
-    bool         dirty() const { return mDirtyPath; }
-    const VPath &localPath() const { return mTemp; }
+    Object::Type type() const final {
+        return Object::Type::Shape;
+    }
+    bool         dirty() const {
+        return mDirtyPath;
+    }
+    const VPath &localPath() const {
+        return mTemp;
+    }
     void         finalPath(VPath &result);
     void         updatePath(const VPath &path)
     {
         mTemp = path;
         mDirtyPath = true;
     }
-    bool   staticPath() const { return mStaticPath; }
-    void   setParent(Group *parent) { mParent = parent; }
-    Group *parent() const { return mParent; }
+    bool   staticPath() const {
+        return mStaticPath;
+    }
+    void   setParent(Group *parent) {
+        mParent = parent;
+    }
+    Group *parent() const {
+        return mParent;
+    }
 
 protected:
     virtual void updatePath(VPath &path, int frameNo) = 0;
@@ -529,7 +615,9 @@ public:
     void update(int frameNo, const VMatrix &parentMatrix, float parentAlpha,
                 const DirtyFlag &flag) override;
     void renderList(std::vector<VDrawable *> &list) final;
-    Object::Type type() const final { return Object::Type::Paint; }
+    Object::Type type() const final {
+        return Object::Type::Paint;
+    }
 
 protected:
     virtual bool updateContent(int frameNo, const VMatrix &matrix,
@@ -603,7 +691,9 @@ public:
     explicit Trim(model::Trim *data) : mData(data) {}
     void update(int frameNo, const VMatrix &parentMatrix, float parentAlpha,
                 const DirtyFlag &flag) final;
-    Object::Type type() const final { return Object::Type::Trim; }
+    Object::Type type() const final {
+        return Object::Type::Trim;
+    }
     void         update();
     void         addPathItems(std::vector<Shape *> &list, size_t startOffset);
 
