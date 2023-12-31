@@ -114,7 +114,7 @@ void model::configureModelCacheSize(size_t cacheSize)
 }
 
 std::shared_ptr<model::Composition> model::loadFromFile(const std::string &path,
-                                                        bool cachePolicy)
+        bool cachePolicy)
 {
     if (cachePolicy) {
         auto obj = ModelCache::instance().find(path);

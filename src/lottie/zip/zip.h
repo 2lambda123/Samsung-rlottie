@@ -132,7 +132,7 @@ const char *zip_entry_name(struct zip_t *zip);
  *         Otherwise a negative number (< 0) on error.
  */
 ssize_t zip_entry_read(struct zip_t *zip, void **buf,
-                                         size_t *bufsize);
+                       size_t *bufsize);
 /**
  * Opens zip archive stream into memory.
  *
@@ -142,7 +142,7 @@ ssize_t zip_entry_read(struct zip_t *zip, void **buf,
  * @return the zip archive handler or NULL on error
  */
 struct zip_t *zip_stream_open(const char *stream, size_t size,
-                                                int level, char mode);
+                              int level, char mode);
 
 /**
  * Close zip archive releases resources.

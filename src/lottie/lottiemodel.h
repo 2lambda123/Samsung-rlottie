@@ -106,7 +106,9 @@ inline const Color operator*(float m, const Color &c)
 struct PathData {
     std::vector<VPointF> mPoints;
     bool                 mClosed = false; /* "c" */
-    void        reserve(size_t size) { mPoints.reserve(mPoints.size() + size); }
+    void        reserve(size_t size) {
+        mPoints.reserve(mPoints.size() + size);
+    }
     static void lerp(const PathData &start, const PathData &end, float t,
                      VPath &result)
     {
@@ -128,9 +130,9 @@ struct PathData {
             result.cubicTo(
                 start.mPoints[i] + t * (end.mPoints[i] - start.mPoints[i]),
                 start.mPoints[i + 1] +
-                    t * (end.mPoints[i + 1] - start.mPoints[i + 1]),
+                t * (end.mPoints[i + 1] - start.mPoints[i + 1]),
                 start.mPoints[i + 2] +
-                    t * (end.mPoints[i + 2] - start.mPoints[i + 2]));
+                t * (end.mPoints[i + 2] - start.mPoints[i + 2]));
         }
         if (start.mClosed) result.close();
     }
@@ -159,8 +161,12 @@ template <typename T, typename Tag = void>
 struct Value {
     T     start_;
     T     end_;
-    T     at(float t) const { return lerp(start_, end_, t); }
-    float angle(float) const { return 0; }
+    T     at(float t) const {
+        return lerp(start_, end_, t);
+    }
+    float angle(float) const {
+        return 0;
+    }
     void  cache() {}
 };
 
@@ -181,7 +187,7 @@ struct Value<T, Position> {
             inTangent_ = end_ + inTangent_;
             outTangent_ = start_ + outTangent_;
             length_ = VBezier::fromPoints(start_, outTangent_, inTangent_, end_)
-                          .length();
+                      .length();
             if (vIsZero(length_)) {
                 // this segment has zero length.
                 // so disable expensive path computaion.
@@ -222,10 +228,12 @@ public:
         float progress(int frameNo) const
         {
             return interpolator_ ? interpolator_->value((frameNo - start_) /
-                                                        (end_ - start_))
-                                 : 0;
+                    (end_ - start_))
+                   : 0;
         }
-        T     value(int frameNo) const { return value_.at(progress(frameNo)); }
+        T     value(int frameNo) const {
+            return value_.at(progress(frameNo));
+        }
         float angle(int frameNo) const
         {
             return value_.angle(progress(frameNo));
@@ -253,7 +261,7 @@ public:
     float angle(int frameNo) const
     {
         if ((frames_.front().start_ >= frameNo) ||
-            (frames_.back().end_ <= frameNo))
+                (frames_.back().end_ <= frameNo))
             return 0;
 
         for (const auto &frame : frames_) {
@@ -285,11 +293,19 @@ class Property {
 public:
     using Animation = KeyFrames<T, Tag>;
 
-    Property() { construct(impl_.value_, {}); }
-    explicit Property(T value) { construct(impl_.value_, std::move(value)); }
+    Property() {
+        construct(impl_.value_, {});
+    }
+    explicit Property(T value) {
+        construct(impl_.value_, std::move(value));
+    }
 
-    const Animation &animation() const { return *(impl_.animation_.get()); }
-    const T &        value() const { return impl_.value_; }
+    const Animation &animation() const {
+        return *(impl_.animation_.get());
+    }
+    const T &        value() const {
+        return impl_.value_;
+    }
 
     Animation &animation()
     {
@@ -322,9 +338,13 @@ public:
     Property &operator=(const Property &) = delete;
     Property &operator=(Property &&) = delete;
 
-    ~Property() { destroy(); }
+    ~Property() {
+        destroy();
+    }
 
-    bool isStatic() const { return isValue_; }
+    bool isStatic() const {
+        return isValue_;
+    }
 
     T value(int frameNo) const
     {
@@ -334,7 +354,7 @@ public:
     // special function only for type T=PathData
     template <typename forT = PathData>
     auto value(int frameNo, VPath &path) const ->
-        typename std::enable_if_t<std::is_same<T, forT>::value, void>
+    typename std::enable_if_t<std::is_same<T, forT>::value, void>
     {
         if (isStatic()) {
             value().toPath(path);
@@ -387,7 +407,7 @@ private:
     union details {
         std::unique_ptr<Animation> animation_;
         T                          value_;
-        details(){};
+        details() {};
         details(const details &) = delete;
         details(details &&) = delete;
         details &operator=(details &&) = delete;
@@ -401,8 +421,12 @@ class Path;
 struct PathData;
 struct Dash {
     std::vector<Property<float>> mData;
-    bool                         empty() const { return mData.empty(); }
-    size_t                       size() const { return mData.size(); }
+    bool                         empty() const {
+        return mData.empty();
+    }
+    size_t                       size() const {
+        return mData.size();
+    }
     bool                         isStatic() const
     {
         for (const auto &elm : mData)
@@ -419,7 +443,9 @@ public:
     {
         return mOpacity.value(frameNo) / 100.0f;
     }
-    bool isStatic() const { return mIsStatic; }
+    bool isStatic() const {
+        return mIsStatic;
+    }
 
 public:
     Property<PathData> mShape;
@@ -463,12 +489,24 @@ public:
     Object(const Object &) = delete;
     Object &operator=(const Object &) = delete;
 
-    void         setStatic(bool value) { mData._static = value; }
-    bool         isStatic() const { return mData._static; }
-    bool         hidden() const { return mData._hidden; }
-    void         setHidden(bool value) { mData._hidden = value; }
-    void         setType(Object::Type type) { mData._type = type; }
-    Object::Type type() const { return mData._type; }
+    void         setStatic(bool value) {
+        mData._static = value;
+    }
+    bool         isStatic() const {
+        return mData._static;
+    }
+    bool         hidden() const {
+        return mData._hidden;
+    }
+    void         setHidden(bool value) {
+        mData._hidden = value;
+    }
+    void         setType(Object::Type type) {
+        mData._type = type;
+    }
+    Object::Type type() const {
+        return mData._type;
+    }
     void         setName(const char *name)
     {
         if (name) {
@@ -482,12 +520,18 @@ public:
             }
         }
     }
-    const char *name() const { return shortString() ? mData._buffer : mPtr; }
+    const char *name() const {
+        return shortString() ? mData._buffer : mPtr;
+    }
 
 private:
     static constexpr unsigned char maxShortStringLength = 14;
-    void setShortString(bool value) { mData._shortString = value; }
-    bool shortString() const { return mData._shortString; }
+    void setShortString(bool value) {
+        mData._shortString = value;
+    }
+    bool shortString() const {
+        return mData._shortString;
+    }
     struct Data {
         char         _buffer[maxShortStringLength];
         Object::Type _type;
@@ -503,9 +547,15 @@ private:
 
 struct Asset {
     enum class Type : unsigned char { Precomp, Image, Char };
-    bool                  isStatic() const { return mStatic; }
-    void                  setStatic(bool value) { mStatic = value; }
-    VBitmap               bitmap() const { return mBitmap; }
+    bool                  isStatic() const {
+        return mStatic;
+    }
+    void                  setStatic(bool value) {
+        mStatic = value;
+    }
+    VBitmap               bitmap() const {
+        return mBitmap;
+    }
     void                  loadImageData(std::string data);
     void                  loadImagePath(std::string Path);
     Type                  mAssetType{Type::Precomp};
@@ -524,7 +574,9 @@ class Composition : public Object {
 public:
     Composition() : Object(Object::Type::Composition) {}
     std::vector<LayerInfo>     layerInfoList() const;
-    const std::vector<Marker> &markers() const { return mMarkers; }
+    const std::vector<Marker> &markers() const {
+        return mMarkers;
+    }
     double                     duration() const
     {
         return frameDuration() / frameRate();  // in second
@@ -539,12 +591,24 @@ public:
     {
         return long(frameAtPos(timeInSec / duration()));
     }
-    size_t totalFrame() const { return mEndFrame - mStartFrame + 1; }
-    long   frameDuration() const { return mEndFrame - mStartFrame; }
-    float  frameRate() const { return mFrameRate; }
-    size_t startFrame() const { return mStartFrame; }
-    size_t endFrame() const { return mEndFrame; }
-    VSize  size() const { return mSize; }
+    size_t totalFrame() const {
+        return mEndFrame - mStartFrame + 1;
+    }
+    long   frameDuration() const {
+        return mEndFrame - mStartFrame;
+    }
+    float  frameRate() const {
+        return mFrameRate;
+    }
+    size_t startFrame() const {
+        return mStartFrame;
+    }
+    size_t endFrame() const {
+        return mEndFrame;
+    }
+    VSize  size() const {
+        return mSize;
+    }
     void   processRepeaterObjects();
     void   updateStats();
 
@@ -607,7 +671,7 @@ public:
         setStatic(staticFlag);
         if (isStatic()) {
             new (&impl.mStaticData)
-                StaticData(data->matrix(0), data->opacity(0));
+            StaticData(data->matrix(0), data->opacity(0));
         } else {
             impl.mData = data;
         }
@@ -626,7 +690,9 @@ public:
     Transform(Transform &&) = delete;
     Transform &operator=(Transform &) = delete;
     Transform &operator=(Transform &&) = delete;
-    ~Transform() noexcept { destroy(); }
+    ~Transform() noexcept {
+        destroy();
+    }
 
 private:
     void destroy()
@@ -646,7 +712,7 @@ private:
     union details {
         Data *     mData{nullptr};
         StaticData mStaticData;
-        details(){};
+        details() {};
         details(const details &) = delete;
         details(details &&) = delete;
         details &operator=(details &&) = delete;
@@ -676,35 +742,65 @@ public:
         Text = 5
     };
     Layer() : Group(Object::Type::Layer) {}
-    bool    hasRoundedCorner() const noexcept { return mHasRoundedCorner; }
-    bool    hasPathOperator() const noexcept { return mHasPathOperator; }
-    bool    hasGradient() const noexcept { return mHasGradient; }
-    bool    hasMask() const noexcept { return mHasMask; }
-    bool    hasRepeater() const noexcept { return mHasRepeater; }
-    int     id() const noexcept { return mId; }
-    int     parentId() const noexcept { return mParentId; }
-    bool    hasParent() const noexcept { return mParentId != -1; }
-    int     inFrame() const noexcept { return mInFrame; }
-    int     outFrame() const noexcept { return mOutFrame; }
-    int     startFrame() const noexcept { return mStartFrame; }
+    bool    hasRoundedCorner() const noexcept {
+        return mHasRoundedCorner;
+    }
+    bool    hasPathOperator() const noexcept {
+        return mHasPathOperator;
+    }
+    bool    hasGradient() const noexcept {
+        return mHasGradient;
+    }
+    bool    hasMask() const noexcept {
+        return mHasMask;
+    }
+    bool    hasRepeater() const noexcept {
+        return mHasRepeater;
+    }
+    int     id() const noexcept {
+        return mId;
+    }
+    int     parentId() const noexcept {
+        return mParentId;
+    }
+    bool    hasParent() const noexcept {
+        return mParentId != -1;
+    }
+    int     inFrame() const noexcept {
+        return mInFrame;
+    }
+    int     outFrame() const noexcept {
+        return mOutFrame;
+    }
+    int     startFrame() const noexcept {
+        return mStartFrame;
+    }
     Color   solidColor() const noexcept
     {
         return mExtra ? mExtra->mSolidColor : Color();
     }
-    bool    autoOrient() const noexcept { return mAutoOrient; }
+    bool    autoOrient() const noexcept {
+        return mAutoOrient;
+    }
     int     timeRemap(int frameNo) const;
-    VSize   layerSize() const { return mLayerSize; }
-    bool    precompLayer() const { return mLayerType == Type::Precomp; }
+    VSize   layerSize() const {
+        return mLayerSize;
+    }
+    bool    precompLayer() const {
+        return mLayerType == Type::Precomp;
+    }
     VMatrix matrix(int frameNo) const
     {
         return mTransform ? mTransform->matrix(frameNo, autoOrient())
-                          : VMatrix{};
+               : VMatrix{};
     }
     float opacity(int frameNo) const
     {
         return mTransform ? mTransform->opacity(frameNo) : 1.0f;
     }
-    Asset *asset() const { return mExtra ? mExtra->mAsset : nullptr; }
+    Asset *asset() const {
+        return mExtra ? mExtra->mAsset : nullptr;
+    }
     struct Extra {
         Color               mSolidColor;
         std::string         mPreCompRefId;
@@ -772,16 +868,28 @@ inline int Layer::timeRemap(int frameNo) const
 class Stroke : public Object {
 public:
     Stroke() : Object(Object::Type::Stroke) {}
-    Color color(int frameNo) const { return mColor.value(frameNo); }
+    Color color(int frameNo) const {
+        return mColor.value(frameNo);
+    }
     float opacity(int frameNo) const
     {
         return mOpacity.value(frameNo) / 100.0f;
     }
-    float     strokeWidth(int frameNo) const { return mWidth.value(frameNo); }
-    CapStyle  capStyle() const { return mCapStyle; }
-    JoinStyle joinStyle() const { return mJoinStyle; }
-    float     miterLimit() const { return mMiterLimit; }
-    bool      hasDashInfo() const { return !mDash.empty(); }
+    float     strokeWidth(int frameNo) const {
+        return mWidth.value(frameNo);
+    }
+    CapStyle  capStyle() const {
+        return mCapStyle;
+    }
+    JoinStyle joinStyle() const {
+        return mJoinStyle;
+    }
+    float     miterLimit() const {
+        return mMiterLimit;
+    }
+    bool      hasDashInfo() const {
+        return !mDash.empty();
+    }
     void      getDashInfo(int frameNo, std::vector<float> &result) const
     {
         return mDash.getDashInfo(frameNo, result);
@@ -838,11 +946,21 @@ public:
 class GradientStroke : public Gradient {
 public:
     GradientStroke() : Gradient(Object::Type::GStroke) {}
-    float     width(int frameNo) const { return mWidth.value(frameNo); }
-    CapStyle  capStyle() const { return mCapStyle; }
-    JoinStyle joinStyle() const { return mJoinStyle; }
-    float     miterLimit() const { return mMiterLimit; }
-    bool      hasDashInfo() const { return !mDash.empty(); }
+    float     width(int frameNo) const {
+        return mWidth.value(frameNo);
+    }
+    CapStyle  capStyle() const {
+        return mCapStyle;
+    }
+    JoinStyle joinStyle() const {
+        return mJoinStyle;
+    }
+    float     miterLimit() const {
+        return mMiterLimit;
+    }
+    bool      hasDashInfo() const {
+        return !mDash.empty();
+    }
     void      getDashInfo(int frameNo, std::vector<float> &result) const
     {
         return mDash.getDashInfo(frameNo, result);
@@ -859,7 +977,9 @@ public:
 class GradientFill : public Gradient {
 public:
     GradientFill() : Gradient(Object::Type::GFill) {}
-    FillRule fillRule() const { return mFillRule; }
+    FillRule fillRule() const {
+        return mFillRule;
+    }
 
 public:
     FillRule mFillRule{FillRule::Winding}; /* "r" */
@@ -868,12 +988,16 @@ public:
 class Fill : public Object {
 public:
     Fill() : Object(Object::Type::Fill) {}
-    Color color(int frameNo) const { return mColor.value(frameNo); }
+    Color color(int frameNo) const {
+        return mColor.value(frameNo);
+    }
     float opacity(int frameNo) const
     {
         return mOpacity.value(frameNo) / 100.0f;
     }
-    FillRule fillRule() const { return mFillRule; }
+    FillRule fillRule() const {
+        return mFillRule;
+    }
 
 public:
     FillRule        mFillRule{FillRule::Winding}; /* "r" */
@@ -905,7 +1029,9 @@ public:
 class RoundedCorner : public Object {
 public:
     RoundedCorner() : Object(Object::Type::RoundedCorner) {}
-    float radius(int frameNo) const { return mRadius.value(frameNo);}
+    float radius(int frameNo) const {
+        return mRadius.value(frameNo);
+    }
 public:
     Property<float>   mRadius{0};
 };
@@ -916,13 +1042,13 @@ public:
     float roundness(int frameNo)
     {
         return mRoundedCorner ? mRoundedCorner->radius(frameNo) :
-                                mRound.value(frameNo);
+               mRound.value(frameNo);
     }
 
     bool roundnessChanged(int prevFrame, int curFrame)
     {
         return mRoundedCorner ? mRoundedCorner->mRadius.changed(prevFrame, curFrame) :
-                        mRound.changed(prevFrame, curFrame);
+               mRound.changed(prevFrame, curFrame);
     }
 public:
     RoundedCorner*    mRoundedCorner{nullptr};
@@ -982,13 +1108,27 @@ public:
         Property<float>   mEndOpacity{100};   /* "eo" */
     };
     Repeater() : Object(Object::Type::Repeater) {}
-    Group *content() const { return mContent ? mContent : nullptr; }
-    void   setContent(Group *content) { mContent = content; }
-    int    maxCopies() const { return int(mMaxCopies); }
-    float  copies(int frameNo) const { return mCopies.value(frameNo); }
-    float  offset(int frameNo) const { return mOffset.value(frameNo); }
-    bool   processed() const { return mProcessed; }
-    void   markProcessed() { mProcessed = true; }
+    Group *content() const {
+        return mContent ? mContent : nullptr;
+    }
+    void   setContent(Group *content) {
+        mContent = content;
+    }
+    int    maxCopies() const {
+        return int(mMaxCopies);
+    }
+    float  copies(int frameNo) const {
+        return mCopies.value(frameNo);
+    }
+    float  offset(int frameNo) const {
+        return mOffset.value(frameNo);
+    }
+    bool   processed() const {
+        return mProcessed;
+    }
+    void   markProcessed() {
+        mProcessed = true;
+    }
 
 public:
     Group *         mContent{nullptr};
@@ -1033,7 +1173,7 @@ public:
                 return noloop(start - 1, end - 1);
             } else {
                 return (start > 1) ? loop(start - 1, end)
-                                   : loop(start, end - 1);
+                       : loop(start, end - 1);
             }
         } else {
             start += offset;
@@ -1044,11 +1184,13 @@ public:
                 return noloop(1 + start, 1 + end);
             } else {
                 return (start < 0) ? loop(1 + start, end)
-                                   : loop(start, 1 + end);
+                       : loop(start, 1 + end);
             }
         }
     }
-    Trim::TrimType type() const { return mTrimType; }
+    Trim::TrimType type() const {
+        return mTrimType;
+    }
 
 private:
     Segment noloop(float start, float end) const
@@ -1126,19 +1268,19 @@ using ColorFilter = std::function<void(float &, float &, float &)>;
 void configureModelCacheSize(size_t cacheSize);
 
 std::shared_ptr<model::Composition> loadFromFile(const std::string &filePath,
-                                                 bool cachePolicy);
+        bool cachePolicy);
 
 std::shared_ptr<model::Composition> loadFromData(std::string        jsonData,
-                                                 const std::string &key,
-                                                 std::string resourcePath,
-                                                 bool        cachePolicy);
+        const std::string &key,
+        std::string resourcePath,
+        bool        cachePolicy);
 
 std::shared_ptr<model::Composition> loadFromData(std::string jsonData,
-                                                 std::string resourcePath,
-                                                 ColorFilter filter);
+        std::string resourcePath,
+        ColorFilter filter);
 
 std::shared_ptr<model::Composition> parse(char *str, size_t length, std::string dir_path,
-                                          ColorFilter filter = {});
+        ColorFilter filter = {});
 
 }  // namespace model
 

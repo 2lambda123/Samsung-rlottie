@@ -27,23 +27,23 @@
 static void
 _on_resize(Ecore_Evas *ee)
 {
-   EvasApp *app = (EvasApp *)ecore_evas_data_get(ee, "app");
-   int w, h;
-   ecore_evas_geometry_get(ee, NULL, NULL, &w, &h);
-   app->resize(w, h);
-   if (app->mResizeCb)
-       app->mResizeCb(app->mResizeData, nullptr);
+    EvasApp *app = (EvasApp *)ecore_evas_data_get(ee, "app");
+    int w, h;
+    ecore_evas_geometry_get(ee, NULL, NULL, &w, &h);
+    app->resize(w, h);
+    if (app->mResizeCb)
+        app->mResizeCb(app->mResizeData, nullptr);
 }
 
 static void
 _on_delete(Ecore_Evas *ee)
 {
-   EvasApp *app = (EvasApp *)ecore_evas_data_get(ee, "app");
-   if (app->mExitCb)
-       app->mExitCb(app->mExitData, nullptr);
+    EvasApp *app = (EvasApp *)ecore_evas_data_get(ee, "app");
+    if (app->mExitCb)
+        app->mExitCb(app->mExitData, nullptr);
 
-   ecore_main_loop_quit();
-   ecore_evas_free(ee);
+    ecore_main_loop_quit();
+    ecore_evas_free(ee);
 }
 
 static Eina_Bool
@@ -76,12 +76,12 @@ on_post_render(Ecore_Evas *ee)
 
 void EvasApp::exit()
 {
-   _on_delete(mEcoreEvas);
+    _on_delete(mEcoreEvas);
 }
 EvasApp::EvasApp(int w, int h)
 {
     if (!ecore_evas_init())
-     return;
+        return;
     mw = w;
     mh = h;
     //setenv("ECORE_EVAS_ENGINE", "opengl_x11", 1);
@@ -122,9 +122,9 @@ void EvasApp::run()
 }
 
 static bool isLottiefile(const char *filename) {
-  const char *dot = strrchr(filename, '.');
-  if(!dot || dot == filename) return false;
-  return !strcmp(dot + 1, "json") || !strcmp(dot + 1, "lottie");
+    const char *dot = strrchr(filename, '.');
+    if(!dot || dot == filename) return false;
+    return !strcmp(dot + 1, "json") || !strcmp(dot + 1, "lottie");
 }
 
 std::vector<std::string>
@@ -135,14 +135,16 @@ EvasApp::jsonFiles(const std::string &dirName, bool /*recurse*/)
     std::vector<std::string> result;
     d = opendir(dirName.c_str());
     if (d) {
-      while ((dir = readdir(d)) != NULL) {
-        if (isLottiefile(dir->d_name))
-          result.push_back(dirName + dir->d_name);
-      }
-      closedir(d);
+        while ((dir = readdir(d)) != NULL) {
+            if (isLottiefile(dir->d_name))
+                result.push_back(dirName + dir->d_name);
+        }
+        closedir(d);
     }
 
-    std::sort(result.begin(), result.end(), [](auto & a, auto &b){return a < b;});
+    std::sort(result.begin(), result.end(), [](auto & a, auto &b) {
+        return a < b;
+    });
 
     return result;
 }

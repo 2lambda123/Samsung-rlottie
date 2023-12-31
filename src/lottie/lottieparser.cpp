@@ -112,7 +112,9 @@ public:
         v_.SetDouble(d);
         return true;
     }
-    bool RawNumber(const char *, SizeType, bool) { return false; }
+    bool RawNumber(const char *, SizeType, bool) {
+        return false;
+    }
     bool String(const char *str, SizeType length, bool)
     {
         st_ = kHasString;
@@ -188,7 +190,9 @@ public:
     bool ParseNext();
 
 public:
-    VArenaAlloc &allocator() { return compRef->mArenaAlloc; }
+    VArenaAlloc &allocator() {
+        return compRef->mArenaAlloc;
+    }
     bool         EnterObject();
     bool         EnterArray();
     const char * NextObjectKey();
@@ -205,7 +209,9 @@ public:
     void   SkipValue();
     Value *PeekValue();
     int    PeekType() const;
-    bool   IsValid() { return st_ != kError; }
+    bool   IsValid() {
+        return st_ != kError;
+    }
 
     void                  Skip(const char *key);
     model::BlendMode      getBlendMode();
@@ -312,7 +318,7 @@ private:
              * is closed one)
              */
             if (mInPoint.size() != mOutPoint.size() ||
-                mInPoint.size() != mVertices.size()) {
+                    mInPoint.size() != mVertices.size()) {
                 mResult.clear();
             } else {
                 auto size = mVertices.size();
@@ -756,7 +762,8 @@ static constexpr const unsigned char B64index[256] = {
     58, 59, 60, 61, 0,  0,  0,  0,  0,  0,  0,  0,  1,  2,  3,  4,  5,  6,
     7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
     25, 0,  0,  0,  0,  63, 0,  26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
-    37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51};
+    37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
+};
 
 std::string b64decode(const char *data, const size_t len)
 {
@@ -980,8 +987,9 @@ model::Layer *LottieParserImpl::parseLayer()
             layer->mLayerType = getLayerType();
         } else if (0 == strcmp(key, "nm")) { /*Layer name*/
             layer->setName(GetString());
-        } else if (0 == strcmp(key, "ind")) { /*Layer index in AE. Used for
-                                                 parenting and expressions.*/
+        } else if (0 == strcmp(key, "ind")) {
+            /*Layer index in AE. Used for
+                                                     parenting and expressions.*/
             layer->mId = GetInt();
         } else if (0 == strcmp(key, "ddd")) { /*3d layer */
             ddd = GetInt();
@@ -1236,7 +1244,7 @@ model::Object *LottieParserImpl::parseGroupObject()
             }
             if (!group->mChildren.empty()
                     && group->mChildren.back()->type()
-                            == model::Object::Type::Transform) {
+                    == model::Object::Type::Transform) {
                 group->mTransform =
                     static_cast<model::Transform *>(group->mChildren.back());
                 group->mChildren.pop_back();
@@ -1721,7 +1729,7 @@ model::Stroke *LottieParserImpl::parseStrokeObject()
 }
 
 void LottieParserImpl::parseGradientProperty(model::Gradient *obj,
-                                             const char *     key)
+        const char *     key)
 {
     if (0 == strcmp(key, "t")) {
         obj->mGradientType = GetInt();
@@ -1983,8 +1991,8 @@ bool LottieParserImpl::parseKeyFrameValue(
 }
 
 VInterpolator *LottieParserImpl::interpolator(VPointF     inTangent,
-                                              VPointF     outTangent,
-                                              std::string key)
+        VPointF     outTangent,
+        std::string key)
 {
     if (key.empty()) {
         std::array<char, 20> temp;
@@ -2084,7 +2092,7 @@ void LottieParserImpl::parseKeyFrame(model::KeyFrames<T, Tag> &obj)
         list.push_back(std::move(keyframe));
     } else if (parsed.interpolator) {
         keyframe.interpolator_ = interpolator(
-            inTangent, outTangent, std::move(parsed.interpolatorKey));
+                                     inTangent, outTangent, std::move(parsed.interpolatorKey));
         list.push_back(std::move(keyframe));
     } else {
         // its the last frame discard.
@@ -2400,9 +2408,9 @@ static bool checkDotLottie(const char * str)
 }
 
 std::shared_ptr<model::Composition> model::parse(char *             str,
-                                                 size_t             length,
-                                                 std::string        dir_path,
-                                                 model::ColorFilter filter)
+        size_t             length,
+        std::string        dir_path,
+        model::ColorFilter filter)
 {
     auto input = str;
 
