@@ -21,9 +21,11 @@
  */
 
 #include "lottieitem.h"
+
 #include <algorithm>
 #include <cmath>
 #include <iterator>
+
 #include "lottiekeypath.h"
 #include "vbitmap.h"
 #include "vpainter.h"
@@ -73,7 +75,7 @@ static bool strokeProp(rlottie::Property prop)
 }
 
 static renderer::Layer *createLayerItem(model::Layer *layerData,
-                                        VArenaAlloc * allocator)
+                                        VArenaAlloc  *allocator)
 {
     switch (layerData->mLayerType) {
     case model::Layer::Type::Precomp: {
@@ -107,7 +109,7 @@ renderer::Composition::Composition(std::shared_ptr<model::Composition> model)
 }
 
 void renderer::Composition::setValue(const std::string &keypath,
-                                     LOTVariant &       value)
+                                     LOTVariant        &value)
 {
     LOTKeyPath key(keypath);
     mRootLayer->resolveKeyPath(key, 0, value);
@@ -118,7 +120,7 @@ bool renderer::Composition::update(int frameNo, const VSize &size,
 {
     // check if cached frame is same as requested frame.
     if ((mViewSize == size) && (mCurFrameNo == frameNo) &&
-            (mKeepAspectRatio == keepAspectRatio))
+        (mKeepAspectRatio == keepAspectRatio))
         return false;
 
     mViewSize = size;
@@ -178,13 +180,14 @@ bool renderer::Composition::render(const rlottie::Surface &surface)
         if (isLayerSurfaceCreated && isLayerSurfaceSizeChanged)
             mSurfaceCache.delete_layer_surface();
 
-        mSurfaceCache.create_layer_surface(surface.width(), surface.height(),
-                                           VBitmap::Format::ARGB32_Premultiplied);
+        mSurfaceCache.create_layer_surface(
+            surface.width(), surface.height(),
+            VBitmap::Format::ARGB32_Premultiplied);
 
         // set layer draw region
-        mSurfaceCache.get_layer_painter()->setDrawRegion(
-            VRect(int(surface.drawRegionPosX()), int(surface.drawRegionPosY()),
-                  int(surface.drawRegionWidth()), int(surface.drawRegionHeight())));
+        mSurfaceCache.get_layer_painter()->setDrawRegion(VRect(
+            int(surface.drawRegionPosX()), int(surface.drawRegionPosY()),
+            int(surface.drawRegionWidth()), int(surface.drawRegionHeight())));
     }
 
     mRootLayer->render(&painter, {}, {}, mSurfaceCache);
@@ -211,7 +214,7 @@ void renderer::Mask::update(int frameNo, const VMatrix &parentMatrix,
     /* mask item dosen't inherit opacity */
     mCombinedAlpha = mData->opacity(frameNo);
 
-    if ( flag.testFlag(DirtyFlagBit::Matrix) || dirtyPath ) {
+    if (flag.testFlag(DirtyFlagBit::Matrix) || dirtyPath) {
         mFinalPath.clone(mLocalPath);
         mFinalPath.transform(parentMatrix);
         mRasterRequest = true;
@@ -286,7 +289,8 @@ void renderer::Layer::render(VPainter *painter, const VRle &inheritMask,
 
     if (cache.get_layer_painter() != nullptr) {
         usedPainter->end();
-        painter->drawBitmap(VPoint(), *cache.get_layer_surface(), mCombinedAlpha * 255.0f);
+        painter->drawBitmap(VPoint(), *cache.get_layer_surface(),
+                            mCombinedAlpha * 255.0f);
     }
 }
 
@@ -331,8 +335,7 @@ VRle renderer::LayerMask::maskRle(const VRect &clipRect)
                 return clipRect - e.rle();
             else
                 return e.rle();
-        }
-        ();
+        }();
 
         switch (e.maskMode()) {
         case model::Mask::Mode::Add: {
@@ -386,7 +389,7 @@ bool renderer::Layer::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
 
     if (!keyPath.skip(name())) {
         if (keyPath.fullyResolvesTo(name(), depth) &&
-                transformProp(value.property())) {
+            transformProp(value.property())) {
             //@TODO handle propery update.
         }
     }
@@ -394,7 +397,7 @@ bool renderer::Layer::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
 }
 
 bool renderer::ShapeLayer::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
-        LOTVariant &value)
+                                          LOTVariant &value)
 {
     if (renderer::Layer::resolveKeyPath(keyPath, depth, value)) {
         if (keyPath.propagate(name(), depth)) {
@@ -407,7 +410,7 @@ bool renderer::ShapeLayer::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
 }
 
 bool renderer::CompLayer::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
-        LOTVariant &value)
+                                         LOTVariant &value)
 {
     if (renderer::Layer::resolveKeyPath(keyPath, depth, value)) {
         if (keyPath.propagate(name(), depth)) {
@@ -457,7 +460,7 @@ void renderer::Layer::update(int frameNumber, const VMatrix &parentMatrix,
 
     // 5. if no parent property change and layer is static then nothing to do.
     if (!mLayerData->precompLayer() && flag().testFlag(DirtyFlagBit::None) &&
-            isStatic())
+        isStatic())
         return;
 
     // 6. update the content of the layer
@@ -470,8 +473,8 @@ void renderer::Layer::update(int frameNumber, const VMatrix &parentMatrix,
 VMatrix renderer::Layer::matrix(int frameNo) const
 {
     return mParentLayer
-           ? (mLayerData->matrix(frameNo) * mParentLayer->matrix(frameNo))
-           : mLayerData->matrix(frameNo);
+               ? (mLayerData->matrix(frameNo) * mParentLayer->matrix(frameNo))
+               : mLayerData->matrix(frameNo);
 }
 
 bool renderer::Layer::visible() const
@@ -500,7 +503,7 @@ renderer::CompLayer::CompLayer(model::Layer *layerModel, VArenaAlloc *allocator)
     // 1. keep the layer in back-to-front order.
     // as lottie model keeps the data in front-toback-order.
     for (auto it = mLayerData->mChildren.crbegin();
-            it != mLayerData->mChildren.rend(); ++it) {
+         it != mLayerData->mChildren.rend(); ++it) {
         auto model = static_cast<model::Layer *>(*it);
         auto item = createLayerItem(model, allocator);
         if (item) mLayers.push_back(item);
@@ -512,9 +515,7 @@ renderer::CompLayer::CompLayer(model::Layer *layerModel, VArenaAlloc *allocator)
         if (id >= 0) {
             auto search =
                 std::find_if(mLayers.begin(), mLayers.end(),
-            [id](const auto &val) {
-                return val->id() == id;
-            });
+                             [id](const auto &val) { return val->id() == id; });
             if (search != mLayers.end()) layer->setParentLayer(*search);
         }
     }
@@ -551,9 +552,9 @@ void renderer::CompLayer::render(VPainter *painter, const VRle &inheritMask,
     }
 }
 
-void renderer::CompLayer::renderHelper(VPainter *    painter,
-                                       const VRle &  inheritMask,
-                                       const VRle &  matteRle,
+void renderer::CompLayer::renderHelper(VPainter     *painter,
+                                       const VRle   &inheritMask,
+                                       const VRle   &matteRle,
                                        SurfaceCache &cache)
 {
     VRle mask;
@@ -591,10 +592,10 @@ void renderer::CompLayer::renderHelper(VPainter *    painter,
 }
 
 void renderer::CompLayer::renderMatteLayer(VPainter *painter, const VRle &mask,
-        const VRle &     matteRle,
-        renderer::Layer *layer,
-        renderer::Layer *src,
-        SurfaceCache &   cache)
+                                           const VRle      &matteRle,
+                                           renderer::Layer *layer,
+                                           renderer::Layer *src,
+                                           SurfaceCache    &cache)
 {
     VSize size = painter->clipBoundingRect().size();
     // Decide if we can use fast matte.
@@ -629,7 +630,7 @@ void renderer::CompLayer::renderMatteLayer(VPainter *painter, const VRle &mask,
 
     // 2.2 update srcBuffer if the matte is luma type
     if (layer->matteType() == model::MatteType::Luma ||
-            layer->matteType() == model::MatteType::LumaInv) {
+        layer->matteType() == model::MatteType::LumaInv) {
         srcBitmap.updateLuma();
     }
 
@@ -638,8 +639,7 @@ void renderer::CompLayer::renderMatteLayer(VPainter *painter, const VRle &mask,
     // if the layer has only one renderer then use it as the clip rect
     // when blending 2 buffer and copy back to final buffer to avoid
     // unnecessary pixel processing.
-    if (layer->renderList().size() == 1)
-    {
+    if (layer->renderList().size() == 1) {
         clip = layer->renderList()[0]->rle().boundingRect();
     }
 
@@ -801,52 +801,52 @@ renderer::NullLayer::NullLayer(model::Layer *layerData)
 void renderer::NullLayer::updateContent() {}
 
 static renderer::Object *createContentItem(model::Object *contentData,
-        VArenaAlloc *  allocator)
+                                           VArenaAlloc   *allocator)
 {
     switch (contentData->type()) {
     case model::Object::Type::Group: {
         return allocator->make<renderer::Group>(
-                   static_cast<model::Group *>(contentData), allocator);
+            static_cast<model::Group *>(contentData), allocator);
     }
     case model::Object::Type::Rect: {
         return allocator->make<renderer::Rect>(
-                   static_cast<model::Rect *>(contentData));
+            static_cast<model::Rect *>(contentData));
     }
     case model::Object::Type::Ellipse: {
         return allocator->make<renderer::Ellipse>(
-                   static_cast<model::Ellipse *>(contentData));
+            static_cast<model::Ellipse *>(contentData));
     }
     case model::Object::Type::Path: {
         return allocator->make<renderer::Path>(
-                   static_cast<model::Path *>(contentData));
+            static_cast<model::Path *>(contentData));
     }
     case model::Object::Type::Polystar: {
         return allocator->make<renderer::Polystar>(
-                   static_cast<model::Polystar *>(contentData));
+            static_cast<model::Polystar *>(contentData));
     }
     case model::Object::Type::Fill: {
         return allocator->make<renderer::Fill>(
-                   static_cast<model::Fill *>(contentData));
+            static_cast<model::Fill *>(contentData));
     }
     case model::Object::Type::GFill: {
         return allocator->make<renderer::GradientFill>(
-                   static_cast<model::GradientFill *>(contentData));
+            static_cast<model::GradientFill *>(contentData));
     }
     case model::Object::Type::Stroke: {
         return allocator->make<renderer::Stroke>(
-                   static_cast<model::Stroke *>(contentData));
+            static_cast<model::Stroke *>(contentData));
     }
     case model::Object::Type::GStroke: {
         return allocator->make<renderer::GradientStroke>(
-                   static_cast<model::GradientStroke *>(contentData));
+            static_cast<model::GradientStroke *>(contentData));
     }
     case model::Object::Type::Repeater: {
         return allocator->make<renderer::Repeater>(
-                   static_cast<model::Repeater *>(contentData), allocator);
+            static_cast<model::Repeater *>(contentData), allocator);
     }
     case model::Object::Type::Trim: {
         return allocator->make<renderer::Trim>(
-                   static_cast<model::Trim *>(contentData));
+            static_cast<model::Trim *>(contentData));
     }
     default:
         return nullptr;
@@ -855,7 +855,7 @@ static renderer::Object *createContentItem(model::Object *contentData,
 }
 
 renderer::ShapeLayer::ShapeLayer(model::Layer *layerData,
-                                 VArenaAlloc * allocator)
+                                 VArenaAlloc  *allocator)
     : renderer::Layer(layerData),
       mRoot(allocator->make<renderer::Group>(nullptr, allocator))
 {
@@ -909,7 +909,7 @@ bool renderer::Group::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
 
         if (!keyPath.skip(mModel.name())) {
             if (keyPath.fullyResolvesTo(mModel.name(), depth) &&
-                    transformProp(value.property())) {
+                transformProp(value.property())) {
                 mModel.filter()->addValue(value);
             }
         }
@@ -932,7 +932,7 @@ bool renderer::Fill::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
     }
 
     if (keyPath.fullyResolvesTo(mModel.name(), depth) &&
-            fillProp(value.property())) {
+        fillProp(value.property())) {
         mModel.filter()->addValue(value);
         return true;
     }
@@ -947,7 +947,7 @@ bool renderer::Stroke::resolveKeyPath(LOTKeyPath &keyPath, uint32_t depth,
     }
 
     if (keyPath.fullyResolvesTo(mModel.name(), depth) &&
-            strokeProp(value.property())) {
+        strokeProp(value.property())) {
         mModel.filter()->addValue(value);
         return true;
     }
@@ -969,7 +969,7 @@ void renderer::Group::addChildren(model::Group *data, VArenaAlloc *allocator)
     // keep the content in back-to-front order.
     // as lottie model keeps it in front-to-back order.
     for (auto it = data->mChildren.crbegin(); it != data->mChildren.rend();
-            ++it) {
+         ++it) {
         auto content = createContentItem(*it, allocator);
         if (content) {
             mContents.push_back(content);
@@ -988,7 +988,7 @@ void renderer::Group::update(int frameNo, const VMatrix &parentMatrix,
 
         m *= parentMatrix;
         if (!(flag & DirtyFlagBit::Matrix) && !mModel.transform()->isStatic() &&
-                (m != mMatrix)) {
+            (m != mMatrix)) {
             newFlag |= DirtyFlagBit::Matrix;
         }
 
@@ -1048,7 +1048,7 @@ void renderer::Group::processPaintItems(std::vector<renderer::Shape *> &list)
         }
         case renderer::Object::Type::Paint: {
             static_cast<renderer::Paint *>(content)->addPathItems(list,
-                    curOpCount);
+                                                                  curOpCount);
             break;
         }
         case renderer::Object::Type::Group: {
@@ -1074,7 +1074,7 @@ void renderer::Group::processTrimItems(std::vector<renderer::Shape *> &list)
         }
         case renderer::Object::Type::Trim: {
             static_cast<renderer::Trim *>(content)->addPathItems(list,
-                    curOpCount);
+                                                                 curOpCount);
             break;
         }
         case renderer::Object::Type::Group: {
@@ -1293,7 +1293,7 @@ renderer::GradientFill::GradientFill(model::GradientFill *data)
 }
 
 bool renderer::GradientFill::updateContent(int frameNo, const VMatrix &matrix,
-        float alpha)
+                                           float alpha)
 {
     float combinedAlpha = alpha * mData->opacity(frameNo);
 
@@ -1319,8 +1319,7 @@ renderer::Stroke::Stroke(model::Stroke *data)
 
 static vthread_local std::vector<float> Dash_Vector;
 
-bool renderer::Stroke::updateContent(int frameNo, const VMatrix &matrix,
-                                     float)
+bool renderer::Stroke::updateContent(int frameNo, const VMatrix &matrix, float)
 {
     auto combinedAlpha = mModel.opacity(frameNo);
     auto color = mModel.color(frameNo).toColor(combinedAlpha);
@@ -1356,7 +1355,7 @@ renderer::GradientStroke::GradientStroke(model::GradientStroke *data)
 }
 
 bool renderer::GradientStroke::updateContent(int frameNo, const VMatrix &matrix,
-        float alpha)
+                                             float alpha)
 {
     float combinedAlpha = alpha * mData->opacity(frameNo);
 
@@ -1390,7 +1389,7 @@ void renderer::Trim::update(int frameNo, const VMatrix & /*parentMatrix*/,
     model::Trim::Segment segment = mData->segment(frameNo);
 
     if (!(vCompare(mCache.mSegment.start, segment.start) &&
-            vCompare(mCache.mSegment.end, segment.end))) {
+          vCompare(mCache.mSegment.end, segment.end))) {
         mDirty = true;
         mCache.mSegment = segment;
     }
@@ -1478,7 +1477,7 @@ renderer::Repeater::Repeater(model::Repeater *data, VArenaAlloc *allocator)
 
     for (int i = 0; i < mCopies; i++) {
         auto content = allocator->make<renderer::Group>(
-                           mRepeaterData->content(), allocator);
+            mRepeaterData->content(), allocator);
         // content->setParent(this);
         mContents.push_back(content);
     }
